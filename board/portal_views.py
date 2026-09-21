@@ -9,7 +9,7 @@ from django.db.models import Q
 from django.http import FileResponse, Http404
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST
-from academy.models import Enrollment
+from academy.models import Enrollment, Offering
 from .models import Post, Answer, Attachment
 from .portal_forms import PostForm, AnswerForm
 
@@ -27,16 +27,63 @@ def visible_posts(user):
 def can_edit(user, post):
     return user.is_authenticated and (user.is_staff or (post.user_id == user.pk and post.category == 'question'))
 
+def selected_offering(request):
+    """주소로 전달된 강좌를 확인하고, 현재 사용자의 접근 권한을 검사합니다."""
+    value = request.GET.get('offering', '').strip()
+
+    if not value:
+        return None
+
+    # 잘못된 강좌 번호도 서버 오류 대신 404로 처리합니다.
+    try:
+        offering_id = int(value)
+    except (TypeError, ValueError):
+        raise Http404("강좌를 찾을 수 없습니다.")
+
+    if offering_id <= 0 or offering_id > 9223372036854775807:
+        raise Http404("강좌를 찾을 수 없습니다.")
+
+    offerings = Offering.objects.select_related('course')
+
+    if not request.user.is_authenticated:
+        raise Http404("강좌를 찾을 수 없습니다.")
+
+    if not request.user.is_staff:
+        # 주소의 강좌 번호를 바꿔도 미수강 강좌에는 접근할 수 없습니다.
+        enrolled_ids = Enrollment.objects.filter(
+            user=request.user,
+            status='enrolled'
+        ).values('offering_id')
+        offerings = offerings.filter(pk__in=enrolled_ids)
+
+    return get_object_or_404(offerings, pk=offering_id)
+
 def listing(request):
+    offering = selected_offering(request)
+
+    # 기존 게시글 열람 권한을 유지한 상태에서 강좌 필터를 적용합니다.
     posts = visible_posts(request.user).prefetch_related('answers')
+    if offering:
+        posts = posts.filter(offering=offering)
+
     category = request.GET.get('category', '')
     query = request.GET.get('q', '').strip()
+
     if category in {'notice', 'material', 'question'}:
         posts = posts.filter(category=category)
+
     if query:
         posts = posts.filter(title__icontains=query)
+
     page = Paginator(posts, 10).get_page(request.GET.get('page'))
-    return render(request, 'board/list.html', {'page': page, 'q': query, 'category': category, 'nav':'board'})
+
+    return render(request, 'board/list.html', {
+        'page': page,
+        'q': query,
+        'category': category,
+        'offering': offering,
+        'nav': 'board',
+    })
 
 def detail(request, pk):
     post = get_object_or_404(visible_posts(request.user), pk=pk)
@@ -47,7 +94,17 @@ def edit(request, pk=None):
     post = get_object_or_404(visible_posts(request.user), pk=pk) if pk else None
     if post and not can_edit(request.user, post):
         raise PermissionDenied
-    form = PostForm(request.POST or None, request.FILES or None, instance=post, user=request.user)
+    # 새 글 작성 시에만 주소에서 전달된 강좌를 기본값으로 선택합니다.
+    offering = selected_offering(request) if post is None else None
+    initial = {'offering': offering.pk} if offering else {}
+
+    form = PostForm(
+        request.POST if request.method == 'POST' else None,
+        request.FILES if request.method == 'POST' else None,
+        instance=post,
+        user=request.user,
+        initial=initial,
+    )
     if request.method == 'POST' and form.is_valid():
         post = form.save(commit=False)
         if not post.pk:
