@@ -1,0 +1,2 @@
+{% extends 'academy/base.html' %}
+{% block content %}<section class="panel login"><div class="eyebrow">JOIN US</div><h1>회원가입</h1><p class="lead">학습을 시작할 계정을 만들어 주세요.</p><form class="authform" method="post">{% csrf_token %}{{ form.as_p }}<button class="btn" type="submit">가입하고 시작하기</button></form><p style="margin-top:20px"><a class="link" href="{% url 'login' %}">이미 계정이 있으신가요? 로그인</a></p></section>{% endblock %}

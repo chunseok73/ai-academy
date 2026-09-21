@@ -1,0 +1,18 @@
+# 가상환경은 각 컴퓨터에서 별도로 생성합니다.
+.venv/
+
+# Python이 자동으로 생성하는 임시 파일
+__pycache__/
+*.py[cod]
+
+# 로컬 DB와 첨부파일은 별도 백업 대상으로 관리합니다.
+db.sqlite3
+db.sqlite3-*
+media/
+
+# 비밀번호 등 개인별 설정
+.env
+.env.*
+
+# 배포 시 자동으로 모으는 정적 파일
+staticfiles/

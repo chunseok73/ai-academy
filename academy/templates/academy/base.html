@@ -1,0 +1,27 @@
+{% load static %}
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% block title %}AI 아카데미{% endblock %}</title>
+<link rel="stylesheet" href="{% static 'academy/portal.css' %}"></head>
+<body><a class="skip" href="#main">본문으로 바로가기</a>
+<div class="layout"><aside class="sidebar">
+<a class="brand" href="{% url 'home' %}"><span class="brandmark">AI</span>AI ACADEMY</a>
+<div class="subbrand">학습지원 포털</div>
+<nav aria-label="주요 메뉴">
+<a href="{% url 'home' %}" {% if nav == 'home' %}class="active"{% endif %}><span class="navnumber">01</span>학습 홈</a>
+<a href="{% url 'academy:course_list' %}" {% if request.resolver_match.namespace == 'academy' %}class="active"{% endif %}><span class="navnumber">02</span>교육과정</a>
+<a href="{% url 'mine' %}" {% if nav == 'mine' %}class="active"{% endif %}><span class="navnumber">03</span>내 수강 정보</a>
+<a href="{% url 'board:list' %}" {% if nav == 'board' %}class="active"{% endif %}><span class="navnumber">04</span>게시판</a></nav>
+<div class="sidebottom"><strong>배움이 이어지는 공간</strong><p>나의 과정과 학습자료를 확인하세요.</p></div>
+</aside><div class="workspace"><header class="topbar"><span class="crumb">나의 학습 공간</span>
+<div class="account">
+{% if user.is_authenticated %}
+<span class="avatar">{{ user.username|first }}</span><span>{{ user.get_full_name|default:user.username }}님</span>
+{% if user.is_staff %}<a href="{% url 'admin:index' %}">관리자 화면</a>{% endif %}
+<!-- 실제 세션을 종료하는 폼이며, 다른 사이트의 위조 요청을 CSRF로 막습니다. -->
+<form method="post" action="{% url 'logout' %}">{% csrf_token %}<button type="submit">로그아웃</button></form>
+{% else %}<a href="{% url 'login' %}">로그인</a><a href="{% url 'signup' %}">회원가입</a>{% endif %}
+</div></header><main class="content" id="main">
+{% for message in messages %}<p class="note" role="status">{{ message }}</p>{% endfor %}
+{% block content %}{% endblock %}
+</main></div></div></body></html>

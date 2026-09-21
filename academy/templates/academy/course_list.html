@@ -1,0 +1,4 @@
+{% extends 'academy/base.html' %}
+{% block title %}교육과정 · AI 아카데미{% endblock %}
+{% block content %}<div class="heading"><div><div class="eyebrow">COURSES</div><h1>교육과정</h1><p class="lead">교육 내용과 실제 개설강좌를 확인하세요.</p></div></div>
+<div class="grid equal">{% for course in courses %}<article class="panel"><div class="coursehead"><div class="coursecode">{{ course.code|slice:':2' }}</div><div><span class="badge">{{ course.level }}</span><h2>{{ course.name }}</h2><p class="meta">{{ course.category }}</p></div></div><p>{{ course.description|truncatechars:140 }}</p><p class="meta">개설강좌 {{ course.offerings.all|length }}개</p><a class="btn secondary" href="{% url 'academy:course_detail' course.course_id %}">과정 자세히 보기</a></article>{% empty %}<div class="panel">등록된 교육과정이 없습니다.</div>{% endfor %}</div>{% endblock %}
