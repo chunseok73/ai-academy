@@ -53,10 +53,22 @@
 
         <h3>직접 작성해보세요</h3>
         <p>들여쓰기는 공백 4칸을 사용하세요.</p>
-        <textarea spellcheck="false"
-                  aria-label="파이썬 코드">{{ exercise.starter_code }}</textarea>
-        <button type="button" onclick="runCode(this)">실행하기</button>
+    <form method="post"
+        action="{% url 'review:save_code' exercise.id %}">
+    {% csrf_token %}
 
+    <textarea name="code"
+            spellcheck="false"
+            aria-label="파이썬 코드">{{ exercise.saved_code }}</textarea>
+
+    <button type="button" onclick="runCode(this)">
+        실행하기
+    </button>
+
+    <button type="submit">
+        코드 저장
+    </button>
+</form>
         <h3>실행 결과</h3>
         <pre class="output">코드를 작성하고 실행하기를 누르세요.</pre>
 
