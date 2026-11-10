@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ lesson.title }}</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            max-width: 1000px;
+            margin: 32px auto;
+            padding: 0 20px;
+            line-height: 1.7;
+            background: #f5f7fa;
+            color: #172033;
+        }
+        article {
+            background: white;
+            padding: 24px;
+            margin: 24px 0;
+            border-radius: 12px;
+        }
+        textarea {
+            box-sizing: border-box;
+            width: 100%;
+            min-height: 240px;
+            padding: 16px;
+            font: 16px/1.6 monospace;
+            tab-size: 4;
+        }
+        button {
+            padding: 12px 24px;
+            margin-top: 12px;
+            cursor: pointer;
+        }
+        pre {
+            background: #172033;
+            color: #fff;
+            padding: 16px;
+            min-height: 60px;
+            white-space: pre-wrap;
+            overflow-wrap: anywhere;
+        }
+    </style>
+</head>
+<body>
+    <a href="{% url 'review:lesson_list' %}">← 복습 목록</a>
+    <h1>{{ lesson.title }}</h1>
+
+    {% for exercise in exercises %}
+    <article>
+        <h2>{{ exercise.title }}</h2>
+        <div>{{ exercise.description|linebreaks }}</div>
+
+        <h3>직접 작성해보세요</h3>
+        <p>들여쓰기는 공백 4칸을 사용하세요.</p>
+        <textarea spellcheck="false"
+                  aria-label="파이썬 코드">{{ exercise.starter_code }}</textarea>
+        <button type="button" onclick="runCode(this)">실행하기</button>
+
+        <h3>실행 결과</h3>
+        <pre class="output">코드를 작성하고 실행하기를 누르세요.</pre>
+
+        <details>
+            <summary>예상 결과 확인</summary>
+            <pre>{{ exercise.expected_output }}</pre>
+        </details>
+    </article>
+    {% empty %}
+        <p>등록된 문제가 없습니다.</p>
+    {% endfor %}
+
+    <script>
+        const workerSource = `
+            importScripts(
+                "https://cdn.jsdelivr.net/pyodide/v0.29.3/full/pyodide.js"
+            );
+
+            self.onmessage = async (event) => {
+                try {
+                    const py = await loadPyodide();
+                    let output = "";
+                    const append = (text) => {
+                        output += text + "\\n";
+                        if (output.length > 20000) {
+                            throw new Error("출력량 제한을 초과했습니다.");
+                        }
+                    };
+
+                    py.setStdout({ batched: append });
+                    py.setStderr({ batched: append });
+
+                    self.postMessage({ type: "ready" });
+
+                    try {
+                        await py.runPythonAsync(event.data);
+                        self.postMessage({
+                            type: "done",
+                            text: output || "(출력 없음)"
+                        });
+                    } catch (error) {
+                        self.postMessage({
+                            type: "done",
+                            text: output + "\\n" + String(error)
+                        });
+                    }
+                } catch (error) {
+                    self.postMessage({
+                        type: "done",
+                        text: "실행 환경 오류: " + String(error)
+                    });
+                }
+            };
+        `;
+
+        function runCode(button) {
+            const article = button.closest("article");
+            const output = article.querySelector(".output");
+            const code = article.querySelector("textarea").value;
+
+            button.disabled = true;
+            output.textContent = "Python 실행 환경을 준비하고 있어요…";
+
+            const url = URL.createObjectURL(
+                new Blob([workerSource], { type: "text/javascript" })
+            );
+            const worker = new Worker(url);
+            let timer;
+
+            function finish(text) {
+                clearTimeout(timer);
+                worker.terminate();
+                URL.revokeObjectURL(url);
+                output.textContent = text;
+                button.disabled = false;
+            }
+
+            timer = setTimeout(() => {
+                finish("로딩 시간이 초과됐어요. 인터넷 연결을 확인하고 다시 실행해주세요.");
+            }, 120000);
+
+            worker.onmessage = ({ data }) => {
+                if (data.type === "ready") {
+                    clearTimeout(timer);
+                    output.textContent = "코드 실행 중…";
+                    timer = setTimeout(() => {
+                        finish("실행 시간이 5초를 초과했어요. 반복문 조건을 확인하세요.");
+                    }, 5000);
+                } else {
+                    finish(data.text);
+                }
+            };
+
+            worker.onerror = () => {
+                finish("실행 환경을 불러오지 못했어요. 인터넷 연결을 확인해주세요.");
+            };
+
+            worker.postMessage(code);
+        }
+    </script>
+</body>
+</html>

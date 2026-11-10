@@ -13,7 +13,11 @@
 
     {% for lesson in lessons %}
         <section>
-            <h2>{{ lesson.title }}</h2>
+            <h2>
+                <a href="{% url 'review:lesson_detail' lesson.id %}">
+                    {{ lesson.title }}
+                </a>
+            </h2>
             <p>{{ lesson.offering.name }} · {{ lesson.lesson_date }}</p>
             <p>{{ lesson.description|linebreaksbr }}</p>
             <p>등록된 문제: {{ lesson.exercises.count }}개</p>
