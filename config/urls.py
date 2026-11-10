@@ -10,6 +10,7 @@ class PortalLoginView(LoginView):
     redirect_authenticated_user = True
 
 urlpatterns = [
+    path("review/", include("review.urls")),
     path('board/', include('board.portal_urls')),
     path('enroll/<int:offering_id>/', enrollment_views.enroll, name='enroll'),
     path('enrollments/<int:enrollment_id>/cancel/', enrollment_views.cancel, name='cancel_enrollment'),

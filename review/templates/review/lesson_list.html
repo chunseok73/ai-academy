@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>복습 수업</title>
+</head>
+<body>
+    <h1>복습 수업</h1>
+    <p>수업 내용을 복습하고 직접 코드를 작성해보세요.</p>
+    <a href="/">학습 홈으로</a>
+
+    <hr>
+
+    {% for lesson in lessons %}
+        <section>
+            <h2>{{ lesson.title }}</h2>
+            <p>{{ lesson.offering.name }} · {{ lesson.lesson_date }}</p>
+            <p>{{ lesson.description|linebreaksbr }}</p>
+            <p>등록된 문제: {{ lesson.exercises.count }}개</p>
+        </section>
+        <hr>
+    {% empty %}
+        <p>현재 수강 중인 강좌에 등록된 복습 수업이 없습니다.</p>
+    {% endfor %}
+</body>
+</html>
