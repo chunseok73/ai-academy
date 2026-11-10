@@ -49,6 +49,9 @@ INSTALLED_APPS = [
 
     # 공지, 질문, 자료와 답변·첨부파일을 관리하는 앱
     "board.apps.BoardConfig",
+
+    # 복습을 할수 있도록 관리하는 앱
+    "review.apps.ReviewConfig",
 ]
 
 MIDDLEWARE = [
