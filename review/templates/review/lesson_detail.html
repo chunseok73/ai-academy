@@ -2,172 +2,198 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{{ lesson.title }}</title>
     <style>
-        body {
-            font-family: sans-serif;
-            max-width: 1000px;
-            margin: 32px auto;
-            padding: 0 20px;
-            line-height: 1.7;
-            background: #f5f7fa;
-            color: #172033;
-        }
-        article {
-            background: white;
-            padding: 24px;
-            margin: 24px 0;
-            border-radius: 12px;
-        }
-        textarea {
-            box-sizing: border-box;
-            width: 100%;
-            min-height: 240px;
-            padding: 16px;
-            font: 16px/1.6 monospace;
-            tab-size: 4;
-        }
-        button {
-            padding: 12px 24px;
-            margin-top: 12px;
-            cursor: pointer;
-        }
-        pre {
-            background: #172033;
-            color: #fff;
-            padding: 16px;
-            min-height: 60px;
-            white-space: pre-wrap;
-            overflow-wrap: anywhere;
-        }
+        body { font-family: sans-serif; max-width: 1000px; margin: 32px auto; padding: 0 20px; line-height: 1.7; background: #f5f7fa; color: #172033; }
+        article { background: white; padding: 24px; margin: 24px 0; border-radius: 12px; }
+        textarea { box-sizing: border-box; width: 100%; min-height: 240px; padding: 16px; font: 16px/1.6 monospace; tab-size: 4; }
+        button { padding: 12px 24px; margin-top: 12px; cursor: pointer; }
+        button:disabled { cursor: wait; opacity: .6; }
+        pre { background: #172033; color: white; padding: 16px; min-height: 60px; white-space: pre-wrap; overflow-wrap: anywhere; }
+        .hint { white-space: pre-wrap; }
     </style>
 </head>
 <body>
     <a href="{% url 'review:lesson_list' %}">← 복습 목록</a>
     <h1>{{ lesson.title }}</h1>
-
     {% for exercise in exercises %}
     <article>
         <h2>{{ exercise.title }}</h2>
         <div>{{ exercise.description|linebreaks }}</div>
-
         <h3>직접 작성해보세요</h3>
-        <p>들여쓰기는 공백 4칸을 사용하세요.</p>
-    <form method="post"
-        action="{% url 'review:save_code' exercise.id %}">
-    {% csrf_token %}
-
-    <textarea name="code"
-            spellcheck="false"
-            aria-label="파이썬 코드">{{ exercise.saved_code }}</textarea>
-
-    <button type="button" onclick="runCode(this)">
-        실행하기
-    </button>
-
-    <button type="submit">
-        코드 저장
-    </button>
-</form>
+        <p>들여쓰기는 공백 4칸을 사용하세요. 코드 저장 버튼을 눌러야 저장됩니다.</p>
+        <form method="post" action="{% url 'review:save_code' exercise.id %}">
+            {% csrf_token %}
+            <textarea name="code" maxlength="10000" spellcheck="false" aria-label="파이썬 코드">{{ exercise.saved_code }}</textarea>
+            <button type="button" onclick="runCode(this)" class="run-button">실행하기</button>
+            <button type="submit">코드 저장</button>
+            <button type="button" class="hint-button" data-url="{% url 'review:request_hint' exercise.id %}" onclick="getHint(this)">학습 힌트 받기 · 1단계</button>
+            <p class="hint" role="status" aria-live="polite"></p>
+        </form>
         <h3>실행 결과</h3>
         <pre class="output">코드를 작성하고 실행하기를 누르세요.</pre>
-
-        <details>
-            <summary>예상 결과 확인</summary>
-            <pre>{{ exercise.expected_output }}</pre>
-        </details>
+        <p class="output-check" role="status" aria-live="polite"></p>
+        <details><summary>예상 결과 확인</summary><pre class="expected">{{ exercise.expected_output }}</pre></details>
     </article>
-    {% empty %}
-        <p>등록된 문제가 없습니다.</p>
-    {% endfor %}
+    {% empty %}<p>등록된 문제가 없습니다.</p>{% endfor %}
 
     <script>
-        const workerSource = `
-            importScripts(
-                "https://cdn.jsdelivr.net/pyodide/v0.29.3/full/pyodide.js"
-            );
-
-            self.onmessage = async (event) => {
+    // 함수를 문자열로 변환해 Worker를 만들므로 이중 줄바꿈 이스케이프가 필요 없습니다.
+    function pythonWorker() {
+        importScripts("https://cdn.jsdelivr.net/pyodide/v0.29.3/full/pyodide.js");
+        self.onmessage = async (event) => {
+            try {
+                const py = await loadPyodide();
+                let output = "";
+                const append = (text) => {
+                    output += text + "\n";
+                    if (output.length > 20000) throw new Error("출력량 제한을 초과했습니다.");
+                };
+                py.setStdout({batched: append});
+                py.setStderr({batched: append});
+                self.postMessage({type: "ready"});
                 try {
-                    const py = await loadPyodide();
-                    let output = "";
-                    const append = (text) => {
-                        output += text + "\\n";
-                        if (output.length > 20000) {
-                            throw new Error("출력량 제한을 초과했습니다.");
-                        }
-                    };
-
-                    py.setStdout({ batched: append });
-                    py.setStderr({ batched: append });
-
-                    self.postMessage({ type: "ready" });
-
-                    try {
-                        await py.runPythonAsync(event.data);
-                        self.postMessage({
-                            type: "done",
-                            text: output || "(출력 없음)"
-                        });
-                    } catch (error) {
-                        self.postMessage({
-                            type: "done",
-                            text: output + "\\n" + String(error)
-                        });
-                    }
+                    await py.runPythonAsync(event.data);
+                    self.postMessage({type: "done", ok: true, text: output});
                 } catch (error) {
-                    self.postMessage({
-                        type: "done",
-                        text: "실행 환경 오류: " + String(error)
-                    });
+                    self.postMessage({type: "done", ok: false, text: (output + "\n" + String(error)).slice(-24000)});
                 }
-            };
-        `;
-
-        function runCode(button) {
-            const article = button.closest("article");
-            const output = article.querySelector(".output");
-            const code = article.querySelector("textarea").value;
-
-            button.disabled = true;
-            output.textContent = "Python 실행 환경을 준비하고 있어요…";
-
-            const url = URL.createObjectURL(
-                new Blob([workerSource], { type: "text/javascript" })
-            );
-            const worker = new Worker(url);
-            let timer;
-
-            function finish(text) {
-                clearTimeout(timer);
-                worker.terminate();
-                URL.revokeObjectURL(url);
-                output.textContent = text;
-                button.disabled = false;
+            } catch (error) {
+                self.postMessage({type: "environment", text: "실행 환경 오류: " + String(error)});
             }
+        };
+    }
+    const workerSource = "(" + pythonWorker.toString() + ")();";
+    const normalize = (text) => text.replace(/\r\n/g, "\n").trimEnd();
 
-            timer = setTimeout(() => {
-                finish("로딩 시간이 초과됐어요. 인터넷 연결을 확인하고 다시 실행해주세요.");
-            }, 120000);
+    function invalidateHint(article) {
+        article.hintVersion = (article.hintVersion || 0) + 1;
+        if (article.hintController) article.hintController.abort();
+        article.querySelector(".hint").textContent = "";
+    }
 
-            worker.onmessage = ({ data }) => {
+    document.querySelectorAll("article").forEach((article) => {
+        article.querySelector("textarea").addEventListener("input", () => {
+            article.lastRun = null;
+            invalidateHint(article);
+            article.querySelector(".output-check").textContent = "코드가 바뀌었어요. 다시 실행해주세요.";
+        });
+    });
+
+    function runCode(button) {
+        const article = button.closest("article");
+        const output = article.querySelector(".output");
+        const check = article.querySelector(".output-check");
+        const editor = article.querySelector("textarea");
+        const code = editor.value;
+        const hintButton = article.querySelector(".hint-button");
+        invalidateHint(article);
+        article.lastRun = null;
+        check.textContent = "";
+        button.disabled = true;
+        hintButton.disabled = true;
+        output.textContent = "Python 실행 환경을 준비하고 있어요…";
+        let worker, url, timer, finished = false;
+        function finish(text) {
+            if (finished) return;
+            finished = true;
+            clearTimeout(timer);
+            if (worker) worker.terminate();
+            if (url) URL.revokeObjectURL(url);
+            output.textContent = text || "(출력 없음)";
+            button.disabled = false;
+            hintButton.disabled = false;
+        }
+        try {
+            url = URL.createObjectURL(new Blob([workerSource], {type: "text/javascript"}));
+            worker = new Worker(url);
+            timer = setTimeout(() => finish("로딩 시간이 초과됐어요. 인터넷 연결을 확인해주세요."), 120000);
+            worker.onmessage = ({data}) => {
+                if (finished) return;
                 if (data.type === "ready") {
                     clearTimeout(timer);
                     output.textContent = "코드 실행 중…";
-                    timer = setTimeout(() => {
-                        finish("실행 시간이 5초를 초과했어요. 반복문 조건을 확인하세요.");
-                    }, 5000);
-                } else {
+                    timer = setTimeout(() => finish("실행 시간이 5초를 초과했어요. 반복문 조건을 확인해주세요."), 5000);
+                    return;
+                }
+                if (editor.value !== code) {
+                    finish("실행 중 코드가 바뀌었어요. 현재 코드를 다시 실행해주세요.");
+                    return;
+                }
+                if (data.type !== "done") {
                     finish(data.text);
+                    return;
+                }
+                article.lastRun = {code, ok: data.ok === true, output: data.text || ""};
+                finish(data.text);
+                const expected = article.querySelector(".expected").textContent;
+                if (!data.ok) {
+                    check.textContent = "실행 오류가 있어요. 학습 힌트로 첫 오류부터 확인해보세요.";
+                } else if (!expected.trim()) {
+                    check.textContent = "실행됐어요. 예상 출력이 등록되지 않아 비교는 생략했어요.";
+                } else if (normalize(data.text || "") === normalize(expected)) {
+                    check.textContent = "예상 출력과 일치해요. 문제에서 요구한 방법으로 풀었는지도 확인해주세요.";
+                } else {
+                    check.textContent = "예상 출력과 달라요. 두 결과를 비교해보세요.";
                 }
             };
-
-            worker.onerror = () => {
-                finish("실행 환경을 불러오지 못했어요. 인터넷 연결을 확인해주세요.");
-            };
-
+            worker.onerror = () => finish("실행 환경을 불러오지 못했어요. 인터넷 연결을 확인해주세요.");
             worker.postMessage(code);
+        } catch (error) {
+            finish("실행 준비 오류: " + error.message);
         }
+    }
+
+    async function getHint(button) {
+        const article = button.closest("article");
+        const form = button.closest("form");
+        const output = form.querySelector(".hint");
+        const code = form.querySelector("textarea").value;
+        invalidateHint(article);
+        const version = article.hintVersion;
+        const controller = new AbortController();
+        article.hintController = controller;
+        const data = new FormData(form);
+        const lastRun = article.lastRun;
+        if (lastRun && lastRun.code === code) {
+            data.set("execution_status", lastRun.ok ? "success" : "error");
+            data.set("execution_output", lastRun.output);
+            data.set("execution_code", lastRun.code);
+        } else {
+            data.set("execution_status", "not_run");
+            data.set("execution_output", "");
+            data.set("execution_code", "");
+        }
+        button.disabled = true;
+        output.textContent = "문법과 실행 결과를 확인하고 있어요…";
+        const timer = setTimeout(() => controller.abort(), 100000);
+        try {
+            const response = await fetch(button.dataset.url, {
+                method: "POST",
+                headers: {"X-CSRFToken": form.querySelector("[name=csrfmiddlewaretoken]").value},
+                body: data, signal: controller.signal
+            });
+            if (!response.headers.get("content-type")?.includes("application/json")) {
+                throw new Error("로그인 상태와 Django 서버 오류를 확인해주세요.");
+            }
+            const result = await response.json();
+            if (!response.ok) throw new Error(result.error || "힌트 요청에 실패했어요.");
+            if (article.hintVersion !== version) return;
+            const label = {syntax: "[문법 검사] ", output_check: "[출력 확인] ", ai: "[AI 힌트 · 참고] "}[result.source] || "";
+            output.textContent = label + result.hint;
+        } catch (error) {
+            if (article.hintVersion === version) {
+                output.textContent = error.name === "AbortError" ? "대기 시간이 초과됐어요. 다시 시도해주세요." : error.message;
+            }
+        } finally {
+            clearTimeout(timer);
+            if (article.hintController === controller) {
+                article.hintController = null;
+                button.disabled = article.querySelector(".run-button").disabled;
+            }
+        }
+    }
     </script>
 </body>
 </html>
