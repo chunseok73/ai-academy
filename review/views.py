@@ -24,9 +24,16 @@ def accessible_lessons(user):
 
 @login_required(login_url="login")
 def lesson_list(request):
-    return render(request, "review/lesson_list.html", {
-        "lessons": accessible_lessons(request.user).prefetch_related("topic__materials"),
-    })
+    lessons = accessible_lessons(request.user).prefetch_related("topic__materials", "exercises")
+    completion = dict(
+        LearningProgress.objects.filter(
+            user=request.user, exercise__lesson__in=accessible_lessons(request.user),
+        ).values_list("exercise_id", "is_completed")
+    )
+    for lesson in lessons:
+        for exercise in lesson.exercises.all():
+            exercise.progress_status = completion.get(exercise.pk)
+    return render(request, "review/lesson_list.html", {"lessons": lessons})
 
 
 @login_required(login_url="login")
