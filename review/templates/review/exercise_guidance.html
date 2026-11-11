@@ -1,0 +1,48 @@
+{% if exercise.guidance %}
+<div class="guidance">
+    <details>
+        <summary>2단계 · 문법과 빈칸</summary>
+        <p>{{ exercise.guidance.prompt }}</p>
+        <pre>{{ exercise.guidance.before }}<input type="text" aria-label="코드 빈칸" placeholder="___" autocomplete="off" onkeydown="if (event.key === 'Enter') { event.preventDefault(); this.closest('details').querySelector('button').click(); }">{{ exercise.guidance.after }}</pre>
+        <button type="button" data-answer="{{ exercise.guidance.answer }}"
+            onclick="
+                const panel = this.closest('details');
+                const value = panel.querySelector('input').value.trim();
+                const feedback = panel.querySelector('[role=status]');
+                if (!value) {
+                    feedback.dataset.state = '';
+                    feedback.textContent = '미입력 · 빈칸을 채워주세요.';
+                } else if (value === this.dataset.answer) {
+                    feedback.dataset.state = 'correct';
+                    feedback.textContent = '정답 · 맞았어요!';
+                } else {
+                    feedback.dataset.state = 'incorrect';
+                    feedback.textContent = '오답 · 위 문법 설명을 다시 확인해보세요.';
+                }
+            ">빈칸 확인</button>
+        <p class="blank-feedback" role="status"></p>
+    </details>
+    <details>
+        <summary>3단계 · 한 줄씩 따라 하기</summary>
+        <p>시작 코드는 그대로 두고 아래 줄을 순서대로 입력해보세요.</p>
+        <ol aria-live="polite">
+            {% for step in exercise.guidance.steps %}
+                <li hidden><pre>{{ step.0 }}</pre><p>{{ step.1 }}</p></li>
+            {% endfor %}
+        </ol>
+        <button type="button" onclick="
+            const panel = this.closest('details');
+            const nextLine = panel.querySelector('li[hidden]');
+            if (!nextLine) return;
+            nextLine.hidden = false;
+            if (panel.querySelector('li[hidden]')) {
+                this.textContent = '다음 줄 보기';
+            } else {
+                this.hidden = true;
+                panel.querySelector('[role=status]').textContent = '모든 줄을 확인했어요. 코드를 실행해보세요.';
+            }
+        ">첫 줄 보기</button>
+        <p role="status"></p>
+    </details>
+</div>
+{% endif %}

@@ -89,6 +89,7 @@ class Exercise(models.Model):
     title = models.CharField("문제 제목", max_length=200)
     description = models.TextField("문제 설명")
     starter_code = models.TextField("시작 코드", blank=True)
+    guidance = models.JSONField("단계별 도움", default=dict, blank=True)
     expected_output = models.TextField("예상 출력", blank=True)
     order = models.PositiveIntegerField("표시 순서", default=1)
 
