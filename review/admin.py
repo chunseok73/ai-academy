@@ -1,5 +1,10 @@
 from django.contrib import admin
-from .models import CurriculumTopic, Lesson, Exercise, LearningProgress, HintRecord
+from .models import CurriculumMaterial, CurriculumTopic, Lesson, Exercise, LearningProgress, HintRecord
+
+
+class CurriculumMaterialInline(admin.TabularInline):
+    model = CurriculumMaterial
+    extra = 0
 
 
 @admin.register(CurriculumTopic)
@@ -8,6 +13,7 @@ class CurriculumTopicAdmin(admin.ModelAdmin):
     list_filter = ("course",)
     search_fields = ("code", "section", "unit", "title")
     readonly_fields = ("course",)
+    inlines = (CurriculumMaterialInline,)
 
     def get_readonly_fields(self, request, obj=None):
         return self.readonly_fields if obj else ()

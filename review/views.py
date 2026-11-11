@@ -25,7 +25,7 @@ def accessible_lessons(user):
 @login_required(login_url="login")
 def lesson_list(request):
     return render(request, "review/lesson_list.html", {
-        "lessons": accessible_lessons(request.user),
+        "lessons": accessible_lessons(request.user).prefetch_related("topic__materials"),
     })
 
 

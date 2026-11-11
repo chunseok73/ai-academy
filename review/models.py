@@ -30,6 +30,26 @@ class CurriculumTopic(models.Model):
         return f"{self.course} · {self.code} {self.breadcrumb}"
 
 
+class CurriculumMaterial(models.Model):
+    topic = models.ForeignKey(
+        CurriculumTopic, on_delete=models.CASCADE, related_name="materials",
+        verbose_name="복습 목차",
+    )
+    title = models.CharField("자료 제목", max_length=150)
+    source_date = models.DateField("원본 자료 날짜")
+    preparation = models.TextField("실습 준비", blank=True)
+    source_location = models.CharField("개인 보관 위치", max_length=300, blank=True)
+    order = models.PositiveIntegerField("표시 순서", default=0)
+
+    class Meta:
+        ordering = ["order", "id"]
+        verbose_name = "복습 참고 자료"
+        verbose_name_plural = "복습 참고 자료"
+
+    def __str__(self):
+        return self.title
+
+
 class Lesson(models.Model):
     offering = models.ForeignKey(
         "academy.Offering",
