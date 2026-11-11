@@ -116,6 +116,17 @@ def request_hint(request, exercise_id):
     # 현재 실행 결과와 DB의 예상 출력을 직접 비교합니다.
     # 빈 예상 출력은 미설정으로 취급합니다.
     expected = exercise.expected_output or ""
+    examples = exercise.guidance.get("output_examples", [])
+    if examples:
+        first_line = next(
+            (line.strip() for line in code.splitlines() if line.strip() and not line.lstrip().startswith("#")),
+            "",
+        )
+        expected = next(
+            (example["output"] for example in examples
+             if "".join(example["input"].split()) == "".join(first_line.split())),
+            "",
+        )
     if (status == "success" and expected.strip()
             and normalize_output(output) == normalize_output(expected)):
         return JsonResponse({

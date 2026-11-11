@@ -106,7 +106,21 @@ for step in steps:
         <h3>실행 결과</h3>
         <pre class="output">코드를 작성하고 실행하기를 누르세요.</pre>
         <p class="output-check" role="status" aria-live="polite"></p>
-        <details><summary>예상 결과 확인</summary><pre class="expected">{{ exercise.expected_output }}</pre></details>
+        <details>
+            {% if exercise.guidance.output_examples %}
+                <summary>입력별 예상 결과 확인</summary>
+                <ul>
+                    {% for example in exercise.guidance.output_examples %}
+                        <li class="output-example" data-input="{{ example.input }}" data-output="{{ example.output }}">
+                            <code>{{ example.input }}</code> → <code>{{ example.output }}</code>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <summary>예상 결과 확인</summary>
+                <pre class="expected">{{ exercise.expected_output }}</pre>
+            {% endif %}
+        </details>
         </section>
     </article>
     {% empty %}<p>등록된 문제가 없습니다.</p>{% endfor %}
@@ -242,6 +256,28 @@ for step in steps:
         });
     });
 
+    function showOutputComparison(article, code, output, check) {
+        const examples = Array.from(article.querySelectorAll(".output-example"));
+        const firstLine = code.split(/\r?\n/).map(line => line.trim())
+            .find(line => line && !line.startsWith("#"));
+        const example = examples.find(item =>
+            item.dataset.input.replace(/\s+/g, "") === firstLine?.replace(/\s+/g, "")
+        );
+        if (examples.length && !example) {
+            check.textContent = "실행됐어요. ‘입력별 예상 결과 확인’에 있는 예시 입력으로 비교할 수 있어요.";
+            return;
+        }
+        const expected = example ? example.dataset.output : article.querySelector(".expected").textContent;
+        const input = example ? `${example.dataset.input}일 때 ` : "";
+        if (!expected.trim()) {
+            check.textContent = "실행됐어요. 예상 출력이 등록되지 않아 비교는 생략했어요.";
+        } else if (normalize(output) === normalize(expected)) {
+            check.textContent = input + "예상 출력과 일치해요. 문제에서 요구한 방법으로 풀었는지도 확인해주세요.";
+        } else {
+            check.textContent = input + `예상 출력 ${expected}과 달라요. 두 결과를 비교해보세요.`;
+        }
+    }
+
     function runCode(button) {
         const article = button.closest("article");
         const output = article.querySelector(".output");
@@ -288,15 +324,10 @@ for step in steps:
                 }
                 article.lastRun = {code, ok: data.ok === true, output: data.text || ""};
                 finish(data.text);
-                const expected = article.querySelector(".expected").textContent;
                 if (!data.ok) {
                     check.textContent = "실행 오류가 있어요. 학습 힌트로 첫 오류부터 확인해보세요.";
-                } else if (!expected.trim()) {
-                    check.textContent = "실행됐어요. 예상 출력이 등록되지 않아 비교는 생략했어요.";
-                } else if (normalize(data.text || "") === normalize(expected)) {
-                    check.textContent = "예상 출력과 일치해요. 문제에서 요구한 방법으로 풀었는지도 확인해주세요.";
                 } else {
-                    check.textContent = "예상 출력과 달라요. 두 결과를 비교해보세요.";
+                    showOutputComparison(article, code, data.text || "", check);
                 }
             };
             worker.onerror = () => finish("실행 환경을 불러오지 못했어요. 인터넷 연결을 확인해주세요.");
