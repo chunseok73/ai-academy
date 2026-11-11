@@ -13,7 +13,7 @@ from .models import Lesson, Exercise, LearningProgress
 
 
 def accessible_lessons(user):
-    lessons = Lesson.objects.select_related("offering__course")
+    lessons = Lesson.objects.select_related("offering__course", "topic")
     if not user.is_staff:
         offering_ids = Enrollment.objects.filter(
             user=user, status="enrolled"

@@ -18,6 +18,7 @@
                     {{ lesson.title }}
                 </a>
             </h2>
+            {% if lesson.topic %}<p>{{ lesson.topic.code }} · {{ lesson.topic.breadcrumb }}</p>{% endif %}
             <p>{{ lesson.offering.name }} · {{ lesson.lesson_date }}</p>
             <p>{{ lesson.description|linebreaksbr }}</p>
             <p>등록된 문제: {{ lesson.exercises.count }}개</p>

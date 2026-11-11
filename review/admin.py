@@ -1,10 +1,21 @@
 from django.contrib import admin
-from .models import Lesson, Exercise, LearningProgress, HintRecord
+from .models import CurriculumTopic, Lesson, Exercise, LearningProgress, HintRecord
+
+
+@admin.register(CurriculumTopic)
+class CurriculumTopicAdmin(admin.ModelAdmin):
+    list_display = ("code", "section", "unit", "title", "course", "order")
+    list_filter = ("course",)
+    search_fields = ("code", "section", "unit", "title")
+    readonly_fields = ("course",)
+
+    def get_readonly_fields(self, request, obj=None):
+        return self.readonly_fields if obj else ()
 
 
 @admin.register(Lesson)
 class LessonAdmin(admin.ModelAdmin):
-    list_display = ("title", "offering", "lesson_date")
+    list_display = ("title", "offering", "topic", "lesson_date")
     list_filter = ("lesson_date",)
     search_fields = ("title",)
 

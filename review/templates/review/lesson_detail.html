@@ -16,6 +16,7 @@
 </head>
 <body>
     <a href="{% url 'review:lesson_list' %}">← 복습 목록</a>
+    {% if lesson.topic %}<p>{{ lesson.topic.code }} · {{ lesson.topic.breadcrumb }}</p>{% endif %}
     <h1>{{ lesson.title }}</h1>
     {% for exercise in exercises %}
     <article>

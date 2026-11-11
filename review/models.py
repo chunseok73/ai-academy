@@ -1,5 +1,33 @@
 from django.conf import settings
+from django.core.exceptions import ValidationError
 from django.db import models
+
+
+class CurriculumTopic(models.Model):
+    course = models.ForeignKey(
+        "academy.Course", on_delete=models.PROTECT, related_name="review_topics",
+        verbose_name="교육과정",
+    )
+    code = models.CharField("목차 번호", max_length=24)
+    section = models.CharField("대분류", max_length=100)
+    unit = models.CharField("중분류", max_length=100)
+    title = models.CharField("소분류", max_length=100)
+    order = models.PositiveIntegerField("표시 순서", default=0)
+
+    class Meta:
+        ordering = ["order", "id"]
+        verbose_name = "복습 목차 항목"
+        verbose_name_plural = "복습 목차 항목"
+        constraints = [
+            models.UniqueConstraint(fields=["course", "code"], name="unique_review_course_topic")
+        ]
+
+    @property
+    def breadcrumb(self):
+        return f"{self.section} → {self.unit} → {self.title}"
+
+    def __str__(self):
+        return f"{self.course} · {self.code} {self.breadcrumb}"
 
 
 class Lesson(models.Model):
@@ -9,6 +37,10 @@ class Lesson(models.Model):
         related_name="lessons",
         verbose_name="개설강좌",
     )
+    topic = models.ForeignKey(
+        CurriculumTopic, on_delete=models.SET_NULL, null=True, blank=True,
+        related_name="lessons", verbose_name="복습 목차",
+    )
     title = models.CharField("수업 제목", max_length=200)
     lesson_date = models.DateField("수업 날짜")
     description = models.TextField("수업 설명", blank=True)
@@ -17,6 +49,11 @@ class Lesson(models.Model):
         ordering = ["lesson_date", "id"]
         verbose_name = "복습 수업"
         verbose_name_plural = "복습 수업"
+
+    def clean(self):
+        super().clean()
+        if self.topic_id and self.offering_id and self.topic.course_id != self.offering.course_id:
+            raise ValidationError({"topic": "개설강좌와 같은 교육과정의 목차를 선택하세요."})
 
     def __str__(self):
         return self.title
