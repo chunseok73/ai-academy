@@ -5,40 +5,112 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{{ lesson.title }}</title>
     <style>
-        body { font-family: sans-serif; max-width: 1000px; margin: 32px auto; padding: 0 20px; line-height: 1.7; background: #f5f7fa; color: #172033; }
-        article { background: white; padding: 24px; margin: 24px 0; border-radius: 12px; }
-        textarea { box-sizing: border-box; width: 100%; min-height: 240px; padding: 16px; font: 16px/1.6 monospace; tab-size: 4; }
-        button { padding: 12px 24px; margin-top: 12px; cursor: pointer; }
-        button:disabled { cursor: wait; opacity: .6; }
-        pre { background: #172033; color: white; padding: 16px; min-height: 60px; white-space: pre-wrap; overflow-wrap: anywhere; }
-        .hint { white-space: pre-wrap; }
+        * { box-sizing: border-box; }
+        body { margin: 0; padding: 32px 20px; background: #eef2f7; color: #182238; font: 16px/1.65 system-ui, sans-serif; }
+        main { max-width: 1040px; margin: auto; }
+        .back { color: #264781; text-decoration: none; }
+        h1 { font-size: clamp(26px, 4vw, 36px); margin: 10px 0 24px; }
+        h2 { margin: 0 0 8px; font-size: 23px; }
+        h3 { margin: 0 0 8px; font-size: 16px; }
+        article { background: white; border: 1px solid #dce3ee; border-radius: 16px; padding: clamp(16px, 4vw, 32px); margin-bottom: 24px; }
+        .problem { padding: 16px 20px; background: #f3f6fb; border-left: 4px solid #4878cd; margin: 16px 0 24px; border-radius: 6px; overflow-wrap: anywhere; }
+        .problem p:first-child { margin-top: 0; }
+        .problem p:last-child { margin-bottom: 0; }
+        .editor { overflow: hidden; border-radius: 10px; background: #17191e; color: #e9edf4; }
+        .editor:focus-within { outline: 3px solid #79a4fc; outline-offset: 2px; }
+        .editor-bar { background: #252832; padding: 9px 16px; color: #bfcbde; font-size: 13px; font-weight: 700; }
+        .code-area { position: relative; height: 280px; }
+        .code-area textarea, .code-area pre { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; border: 0; padding: 16px; font: 16px/1.6 Consolas, "IBM Plex Mono", monospace; tab-size: 4; white-space: pre; overflow: auto; }
+        .code-area textarea { background: transparent; color: #e9edf4; caret-color: #fff; outline: none; resize: none; }
+        .code-area pre { visibility: hidden; pointer-events: none; overflow: hidden; }
+        .code-area.highlighted pre { visibility: visible; }
+        .code-area.highlighted textarea { color: transparent; }
+        .code-area textarea::selection { background: #37577899; color: transparent; }
+        .kw { color: #d3a5ff; } .str { color: #ffd095; } .num { color: #b5e9a4; } .comment { color: #9fb994; } .builtin { color: #8bd6ff; }
+        .editor-help { margin: 8px 0 12px; font-size: 14px; color: #475569; }
+        .actions { display: flex; flex-wrap: wrap; gap: 10px; }
+        button { padding: 10px 16px; border: 1px solid #c8d3e4; border-radius: 8px; background: white; color: #20334d; font: inherit; font-weight: 650; cursor: pointer; }
+        .run-button { background: #234fbc; border-color: #234fbc; color: #fff; }
+        .hint-button { background: #f0eafd; border-color: #d8c7f8; color: #472385; }
+        button:focus-visible, a:focus-visible, summary:focus-visible { outline: 3px solid #5287ee; outline-offset: 3px; }
+        button:disabled { opacity: .6; cursor: default; }
+        .hint, .output-check { white-space: pre-wrap; overflow-wrap: anywhere; }
+        .hint:not(:empty) { padding: 12px 16px; background: #f6f0ff; color: #41276b; border-radius: 8px; }
+        .result { margin-top: 24px; }
+        .result pre { margin: 0; padding: 16px; min-height: 76px; border-radius: 8px; background: #141b28; color: #e6edf8; white-space: pre-wrap; overflow-wrap: anywhere; font: 15px/1.65 Consolas, monospace; }
+        .output-check { color: #25446d; }
+        .guidance { margin: 16px 0; padding: 16px; border: 1px solid #d8c7f8; border-radius: 8px; }
+        .guidance details + details { margin-top: 12px; }
+        .guidance pre { padding: 12px; background: #17191e; color: #e9edf4; border-radius: 6px; overflow: auto; }
+        .blank-feedback:not(:empty) { padding: 10px 14px; border-radius: 6px; font-weight: 650; background: #f3f6fb; }
+        .blank-feedback[data-state="correct"] { color: #135b38; background: #e9f7ef; }
+        .blank-feedback[data-state="incorrect"] { color: #8e2925; background: #fff1ef; }
+        summary { cursor: pointer; color: #264781; }
     </style>
 </head>
 <body>
-    <a href="{% url 'review:lesson_list' %}">← 복습 목록</a>
-    {% if lesson.topic %}<p>{{ lesson.topic.code }} · {{ lesson.topic.breadcrumb }}</p>{% endif %}
+<main>
+    <a class="back" href="{% url 'review:lesson_list' %}">← 복습 목록</a>
     <h1>{{ lesson.title }}</h1>
+    {% if lesson.topic %}
+        <p>{{ lesson.topic.code }} · {{ lesson.topic.breadcrumb }}</p>
+    {% endif %}    
     {% for exercise in exercises %}
     <article>
         <h2>{{ exercise.title }}</h2>
-        <div>{{ exercise.description|linebreaks }}</div>
+        <div class="problem">{{ exercise.description|linebreaks }}</div>
         <h3>직접 작성해보세요</h3>
-        <p>들여쓰기는 공백 4칸을 사용하세요. 코드 저장 버튼을 눌러야 저장됩니다.</p>
         <form method="post" action="{% url 'review:save_code' exercise.id %}">
             {% csrf_token %}
-            <textarea name="code" maxlength="10000" spellcheck="false" aria-label="파이썬 코드">{{ exercise.saved_code }}</textarea>
+            <div class="editor">
+                <div class="editor-bar">Python · main.py</div>
+                <div class="code-area">
+                    <pre aria-hidden="true"></pre>
+                    <textarea name="code" maxlength="10000" wrap="off" spellcheck="false" autocapitalize="off" autocomplete="off" aria-label="파이썬 코드">{{ exercise.saved_code }}</textarea>
+                </div>
+            </div>
+            <p class="editor-help">들여쓰기에는 공백 4칸을 사용하세요. 작성한 코드는 ‘코드 저장’으로 보관할 수 있어요.</p>
+            <div class="actions">
             <button type="button" onclick="runCode(this)" class="run-button">실행하기</button>
             <button type="submit">코드 저장</button>
             <button type="button" class="hint-button" data-url="{% url 'review:request_hint' exercise.id %}" onclick="getHint(this)">학습 힌트 받기 · 1단계</button>
+            </div>
             <p class="hint" role="status" aria-live="polite"></p>
+            {% if exercise.title == "일주일 걷기 기록 합계" %}
+            <div class="guidance">
+                <details>
+                    <summary>2단계 · 문법과 빈칸</summary>
+                    <p>반복문은 <code>steps</code>에서 걸음 수를 하나씩 꺼내 <code>step</code>에 담아요. 이전 합계와 이번 걸음 수를 더하도록 빈칸을 채워보세요.</p>
+                    <pre>total = 0
+for step in steps:
+    total = <input type="text" aria-label="첫 번째 빈칸" placeholder="___" size="6" autocomplete="off"> + <input type="text" aria-label="두 번째 빈칸" placeholder="___" size="6" autocomplete="off"></pre>
+                    <button type="button" class="check-blanks">빈칸 확인</button>
+                    <p class="blank-feedback" role="status"></p>
+                </details>
+                <details class="walkthrough">
+                    <summary>3단계 · 한 줄씩 따라 하기</summary>
+                    <p>아래 줄을 순서대로 코드창에 직접 입력해보세요. 시작 코드에 있는 <code>steps</code> 리스트는 그대로 사용하세요.</p>
+                    <ol aria-live="polite">
+                        <li hidden><pre>total = 0</pre><p>아직 더한 값이 없으므로 합계를 0으로 시작해요.</p></li>
+                        <li hidden><pre>for step in steps:</pre><p>걸음 수를 하나씩 꺼내요. 줄 끝에 콜론을 붙여요.</p></li>
+                        <li hidden><pre>    total += step</pre><p>공백 4칸을 넣어 반복문 안에 작성해요. 첫날과 둘째 날까지 더하면 합계는 3,000에서 7,500으로 바뀌어요.</p></li>
+                        <li hidden><pre>print(total)</pre><p>들여쓰기 없이 작성해 반복이 끝난 뒤 한 번만 출력해요. 이제 ‘실행하기’를 눌러보세요.</p></li>
+                    </ol>
+                    <button type="button" class="next-step">첫 줄 보기</button>
+                </details>
+            </div>
+            {% endif %}
         </form>
+        <section class="result" aria-label="실행 결과">
         <h3>실행 결과</h3>
         <pre class="output">코드를 작성하고 실행하기를 누르세요.</pre>
         <p class="output-check" role="status" aria-live="polite"></p>
         <details><summary>예상 결과 확인</summary><pre class="expected">{{ exercise.expected_output }}</pre></details>
+        </section>
     </article>
     {% empty %}<p>등록된 문제가 없습니다.</p>{% endfor %}
 
+</main>
     <script>
     // 함수를 문자열로 변환해 Worker를 만들므로 이중 줄바꿈 이스케이프가 필요 없습니다.
     function pythonWorker() {
@@ -67,6 +139,93 @@
     }
     const workerSource = "(" + pythonWorker.toString() + ")();";
     const normalize = (text) => text.replace(/\r\n/g, "\n").trimEnd();
+
+    // 코드가 HTML로 해석되지 않도록 텍스트 노드로 표시합니다.
+    function highlightPython(editor, preview) {
+        const tokens = /#[^\n]*|"(?:\\.|[^"\\\n])*"|'(?:\\.|[^'\\\n])*'|\b(?:and|as|assert|async|await|break|class|continue|def|del|elif|else|except|False|finally|for|from|global|if|import|in|is|lambda|None|nonlocal|not|or|pass|raise|return|True|try|while|with|yield)\b|\b(?:print|range|len|sum|int|float|str|list|dict|enumerate|zip|input)\b|\b\d+(?:\.\d+)?\b/g;
+        const fragment = document.createDocumentFragment();
+        let end = 0;
+        for (const match of editor.value.matchAll(tokens)) {
+            fragment.append(editor.value.slice(end, match.index));
+            const token = document.createElement("span");
+            const value = match[0];
+            if (value.startsWith("#")) token.className = "comment";
+            else if (value.startsWith('"') || value.startsWith("'")) token.className = "str";
+            else if (/^\d/.test(value)) token.className = "num";
+            else if (/^(print|range|len|sum|int|float|str|list|dict|enumerate|zip|input)$/.test(value)) token.className = "builtin";
+            else token.className = "kw";
+            token.textContent = value;
+            fragment.append(token);
+            end = match.index + value.length;
+        }
+        fragment.append(editor.value.slice(end) + "\n");
+        preview.replaceChildren(fragment);
+        preview.scrollTop = editor.scrollTop;
+        preview.scrollLeft = editor.scrollLeft;
+    }
+
+    document.querySelectorAll(".code-area").forEach((area) => {
+        const editor = area.querySelector("textarea");
+        const preview = area.querySelector("pre");
+        const refresh = () => highlightPython(editor, preview);
+        editor.addEventListener("input", refresh);
+        editor.addEventListener("scroll", () => {
+            preview.scrollTop = editor.scrollTop;
+            preview.scrollLeft = editor.scrollLeft;
+        });
+        refresh();
+        area.classList.add("highlighted");
+    });
+
+    document.querySelectorAll(".check-blanks").forEach((button) => {
+        const panel = button.closest("details");
+        const inputs = [...panel.querySelectorAll("input")];
+        const feedback = panel.querySelector(".blank-feedback");
+        const check = () => {
+            const [left, right] = inputs.map((input) => input.value.trim());
+            const correct = (left === "total" && right === "step") ||
+                            (left === "step" && right === "total");
+            feedback.dataset.state = correct ? "correct" : (!left || !right ? "incomplete" : "incorrect");
+            if (!left || !right) {
+                feedback.textContent = "미입력 · 두 빈칸을 모두 채워주세요.";
+            } else if (correct) {
+                feedback.textContent = "정답 · 이전 합계(total)와 이번 걸음 수(step)를 더했어요.";
+            } else if (left === "step" || right === "step") {
+                feedback.textContent = "오답 · step은 맞아요. 다른 빈칸에는 이전 합계인 total을 넣어보세요.";
+            } else if (left === "total" || right === "total") {
+                feedback.textContent = "오답 · total은 맞아요. 다른 빈칸에는 이번 걸음 수인 step을 넣어보세요.";
+            } else {
+                feedback.textContent = "오답 · 이전 합계(total)와 이번 걸음 수(step)를 각각 한 번씩 사용해보세요.";
+            }
+        };
+        button.addEventListener("click", check);
+        inputs.forEach((input) => {
+            input.addEventListener("input", () => { feedback.textContent = ""; });
+            input.addEventListener("keydown", (event) => {
+                if (event.key === "Enter" && !event.isComposing) {
+                    event.preventDefault();
+                    check();
+                }
+            });
+        });
+    });
+
+    document.querySelectorAll(".walkthrough").forEach((panel) => {
+        const steps = panel.querySelectorAll("li");
+        const next = panel.querySelector(".next-step");
+        let shown = 0;
+        next.addEventListener("click", () => {
+            if (shown === steps.length) return;
+            steps[shown].hidden = false;
+            shown += 1;
+            if (shown === steps.length) {
+                next.textContent = "모든 줄을 확인했어요";
+                next.disabled = true;
+            } else {
+                next.textContent = "다음 줄 보기";
+            }
+        });
+    });
 
     function invalidateHint(article) {
         article.hintVersion = (article.hintVersion || 0) + 1;
