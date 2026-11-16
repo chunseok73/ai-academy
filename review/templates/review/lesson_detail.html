@@ -58,6 +58,7 @@
     {% for exercise in exercises %}
     <article>
         <h2>{{ exercise.title }}</h2>
+        {% if exercise.is_completed %}<p>복습 완료</p>{% endif %}
         <div class="problem">{{ exercise.description|linebreaks }}</div>
         <h3>직접 작성해보세요</h3>
         <form method="post" action="{% url 'review:save_code' exercise.id %}">
@@ -73,6 +74,11 @@
             <div class="actions">
             <button type="button" onclick="runCode(this)" class="run-button">실행하기</button>
             <button type="submit">코드 저장</button>
+            {% if exercise.is_completed %}
+                <button type="submit" name="completion" value="resume">완료 표시 취소</button>
+            {% else %}
+                <button type="submit" name="completion" value="complete">저장하고 복습 완료</button>
+            {% endif %}
             <button type="button" class="hint-button" data-url="{% url 'review:request_hint' exercise.id %}" onclick="getHint(this)">학습 힌트 받기 · 1단계</button>
             </div>
             <p class="hint" role="status" aria-live="polite"></p>

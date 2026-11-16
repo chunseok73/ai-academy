@@ -28,6 +28,13 @@
             {% endif %}
             <p>{{ lesson.offering.name }} · {{ lesson.lesson_date }}</p>
             <p>{{ lesson.description|linebreaksbr }}</p>
+            {% if lesson.exercise_count %}
+                <p>내 진도 · 완료 {{ lesson.completed_count }}/{{ lesson.exercise_count }} ·
+                    {% if lesson.completed_count == lesson.exercise_count %}복습 완료
+                    {% elif lesson.has_progress %}학습 중
+                    {% else %}시작 전{% endif %}
+                </p>
+            {% endif %}
             <ul aria-label="문제별 복습 진도">
                 {% for exercise in lesson.exercises.all %}
                     <li>

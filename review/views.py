@@ -41,6 +41,9 @@ def lesson_list(request):
     for lesson in lessons:
         for exercise in lesson.exercises.all():
             exercise.progress_status = completion.get(exercise.pk)
+        lesson.exercise_count = len(lesson.exercises.all())
+        lesson.completed_count = sum(bool(exercise.progress_status) for exercise in lesson.exercises.all())
+        lesson.has_progress = any(exercise.progress_status is not None for exercise in lesson.exercises.all())
         topic = topics.get((lesson.topic.code, lesson.topic.unit)) if lesson.topic else None
         if topic is None:
             other_lessons.append(lesson)
@@ -55,11 +58,14 @@ def lesson_list(request):
 def lesson_detail(request, lesson_id):
     lesson = get_object_or_404(accessible_lessons(request.user), pk=lesson_id)
     exercises = list(Exercise.objects.filter(lesson=lesson))
-    saved_codes = dict(LearningProgress.objects.filter(
-        user=request.user, exercise__lesson=lesson,
-    ).values_list("exercise_id", "code"))
+    progress_by_exercise = {
+        progress.exercise_id: progress
+        for progress in LearningProgress.objects.filter(user=request.user, exercise__lesson=lesson)
+    }
     for exercise in exercises:
-        exercise.saved_code = saved_codes.get(exercise.pk, exercise.starter_code)
+        progress = progress_by_exercise.get(exercise.pk)
+        exercise.saved_code = progress.code if progress else exercise.starter_code
+        exercise.is_completed = bool(progress and progress.is_completed)
     return render(request, "review/lesson_detail.html", {
         "lesson": lesson, "exercises": exercises,
     })
@@ -74,8 +80,12 @@ def save_code(request, exercise_id):
     code = request.POST.get("code", "")
     if len(code) > 10000:
         return JsonResponse({"error": "코드를 10,000자 이하로 입력해주세요."}, status=400)
+    changes = {"code": code}
+    completion = request.POST.get("completion")
+    if completion in {"complete", "resume"}:
+        changes["is_completed"] = completion == "complete"
     LearningProgress.objects.update_or_create(
-        user=request.user, exercise=exercise, defaults={"code": code},
+        user=request.user, exercise=exercise, defaults=changes,
     )
     return redirect("review:lesson_detail", lesson_id=exercise.lesson_id)
 
