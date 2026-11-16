@@ -1,0 +1,786 @@
+[
+  {
+    "title": "Python으로 프로그램의 뼈대 만들기",
+    "units": [
+      {
+        "title": "1.1 값과 자료형",
+        "topics": [
+          {
+            "code": "1.1.1",
+            "title": "변수와 출력"
+          },
+          {
+            "code": "1.1.2",
+            "title": "숫자·문자·불리언·형변환"
+          },
+          {
+            "code": "1.1.3",
+            "title": "컬렉션 자료형과 타입 확인"
+          }
+        ]
+      },
+      {
+        "title": "1.2 문자열과 판단",
+        "topics": [
+          {
+            "code": "1.2.1",
+            "title": "인덱싱·슬라이싱"
+          },
+          {
+            "code": "1.2.2",
+            "title": "문자열 가공·출력 형식"
+          },
+          {
+            "code": "1.2.3",
+            "title": "연산자·if·elif·else"
+          }
+        ]
+      },
+      {
+        "title": "1.3 반복과 누적",
+        "topics": [
+          {
+            "code": "1.3.1",
+            "title": "while"
+          },
+          {
+            "code": "1.3.2",
+            "title": "for·range"
+          },
+          {
+            "code": "1.3.3",
+            "title": "break·continue·중첩 반복"
+          },
+          {
+            "code": "1.3.4",
+            "title": "리스트 내포"
+          }
+        ]
+      },
+      {
+        "title": "1.4 함수와 객체",
+        "topics": [
+          {
+            "code": "1.4.1",
+            "title": "매개변수·반환값"
+          },
+          {
+            "code": "1.4.2",
+            "title": "기본값·가변 인자·범위"
+          },
+          {
+            "code": "1.4.3",
+            "title": "클래스·생성자·속성·메서드"
+          }
+        ]
+      },
+      {
+        "title": "1.5 여러 파일과 실행",
+        "topics": [
+          {
+            "code": "1.5.1",
+            "title": "모듈·패키지·import"
+          },
+          {
+            "code": "1.5.2",
+            "title": "별칭·실행 위치"
+          },
+          {
+            "code": "1.5.3",
+            "title": "실행 진입점"
+          }
+        ]
+      },
+      {
+        "title": "1.6 시각적 프로그램",
+        "topics": [
+          {
+            "code": "1.6.1",
+            "title": "turtle 그리기"
+          },
+          {
+            "code": "1.6.2",
+            "title": "키보드 이벤트"
+          },
+          {
+            "code": "1.6.3",
+            "title": "실행 파일 패키징"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "title": "DB와 SQL로 데이터를 오래 보관하기",
+    "units": [
+      {
+        "title": "2.1 DB 접속과 기본 개념",
+        "topics": [
+          {
+            "code": "2.1.1",
+            "title": "사용자·권한"
+          },
+          {
+            "code": "2.1.2",
+            "title": "DB·테이블·행·열"
+          }
+        ]
+      },
+      {
+        "title": "2.2 데이터 조회",
+        "topics": [
+          {
+            "code": "2.2.1",
+            "title": "SELECT·별칭·DISTINCT"
+          },
+          {
+            "code": "2.2.2",
+            "title": "WHERE·NULL·LIKE·IN"
+          },
+          {
+            "code": "2.2.3",
+            "title": "ORDER BY·집합 연산"
+          }
+        ]
+      },
+      {
+        "title": "2.3 계산과 요약",
+        "topics": [
+          {
+            "code": "2.3.1",
+            "title": "문자·숫자·날짜 함수"
+          },
+          {
+            "code": "2.3.2",
+            "title": "NULL 처리"
+          },
+          {
+            "code": "2.3.3",
+            "title": "집계·GROUP BY·HAVING"
+          }
+        ]
+      },
+      {
+        "title": "2.4 여러 테이블 조회",
+        "topics": [
+          {
+            "code": "2.4.1",
+            "title": "내부·외부 조인"
+          },
+          {
+            "code": "2.4.2",
+            "title": "셀프 조인"
+          },
+          {
+            "code": "2.4.3",
+            "title": "서브쿼리"
+          }
+        ]
+      },
+      {
+        "title": "2.5 구조와 변경 관리",
+        "topics": [
+          {
+            "code": "2.5.1",
+            "title": "DDL"
+          },
+          {
+            "code": "2.5.2",
+            "title": "데이터 변경·트랜잭션"
+          },
+          {
+            "code": "2.5.3",
+            "title": "제약조건·뷰"
+          },
+          {
+            "code": "2.5.4",
+            "title": "프로시저·트리거"
+          }
+        ]
+      },
+      {
+        "title": "2.6 DB 모델링",
+        "topics": [
+          {
+            "code": "2.6.1",
+            "title": "요구사항·엔터티·관계"
+          },
+          {
+            "code": "2.6.2",
+            "title": "1:1·1:N·N:N"
+          },
+          {
+            "code": "2.6.3",
+            "title": "개념·논리·물리 모델"
+          },
+          {
+            "code": "2.6.4",
+            "title": "정규화·비정규화"
+          }
+        ]
+      },
+      {
+        "title": "2.7 Python과 DB",
+        "topics": [
+          {
+            "code": "2.7.1",
+            "title": "드라이버·연결·커서"
+          },
+          {
+            "code": "2.7.2",
+            "title": "CRUD·fetch 계열"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "title": "데이터를 모으고 정리해 의미 찾기",
+    "units": [
+      {
+        "title": "3.1 배열 계산",
+        "topics": [
+          {
+            "code": "3.1.1",
+            "title": "NumPy 배열·타입"
+          },
+          {
+            "code": "3.1.2",
+            "title": "배열 연산·난수"
+          }
+        ]
+      },
+      {
+        "title": "3.2 표 데이터",
+        "topics": [
+          {
+            "code": "3.2.1",
+            "title": "Series·DataFrame·행 선택"
+          },
+          {
+            "code": "3.2.2",
+            "title": "CSV·Excel·HTML 읽기·쓰기"
+          },
+          {
+            "code": "3.2.3",
+            "title": "결측치·중복·형식 정리"
+          },
+          {
+            "code": "3.2.4",
+            "title": "상관관계"
+          }
+        ]
+      },
+      {
+        "title": "3.3 DB와 표 연결",
+        "topics": [
+          {
+            "code": "3.3.1",
+            "title": "SQL 결과→DataFrame"
+          },
+          {
+            "code": "3.3.2",
+            "title": "SQLAlchemy 활용"
+          }
+        ]
+      },
+      {
+        "title": "3.4 시각화와 해석",
+        "topics": [
+          {
+            "code": "3.4.1",
+            "title": "선·막대·산점도·원형"
+          },
+          {
+            "code": "3.4.2",
+            "title": "스타일·레이아웃"
+          },
+          {
+            "code": "3.4.3",
+            "title": "분석 질문과 근거"
+          }
+        ]
+      },
+      {
+        "title": "3.5 웹 데이터 수집",
+        "topics": [
+          {
+            "code": "3.5.1",
+            "title": "requests"
+          },
+          {
+            "code": "3.5.2",
+            "title": "BeautifulSoup·선택자"
+          },
+          {
+            "code": "3.5.3",
+            "title": "여러 페이지 수집→표→차트"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "title": "Django로 데이터와 사용자를 연결하기",
+    "units": [
+      {
+        "title": "4.1 웹 프로젝트 뼈대",
+        "topics": [
+          {
+            "code": "4.1.1",
+            "title": "가상환경·프로젝트·앱"
+          },
+          {
+            "code": "4.1.2",
+            "title": "URL→View→Template"
+          },
+          {
+            "code": "4.1.3",
+            "title": "settings와 모델"
+          }
+        ]
+      },
+      {
+        "title": "4.2 ORM과 CRUD",
+        "topics": [
+          {
+            "code": "4.2.1",
+            "title": "모델·마이그레이션"
+          },
+          {
+            "code": "4.2.2",
+            "title": "목록·등록"
+          },
+          {
+            "code": "4.2.3",
+            "title": "수정·삭제"
+          },
+          {
+            "code": "4.2.4",
+            "title": "검색·Q 객체"
+          }
+        ]
+      },
+      {
+        "title": "4.3 응답과 템플릿",
+        "topics": [
+          {
+            "code": "4.3.1",
+            "title": "템플릿 조건"
+          },
+          {
+            "code": "4.3.2",
+            "title": "JSON 응답"
+          }
+        ]
+      },
+      {
+        "title": "4.4 파일 자료실",
+        "topics": [
+          {
+            "code": "4.4.1",
+            "title": "FileField·MEDIA"
+          },
+          {
+            "code": "4.4.2",
+            "title": "업로드 폼"
+          },
+          {
+            "code": "4.4.3",
+            "title": "목록·다운로드·삭제"
+          }
+        ]
+      },
+      {
+        "title": "4.5 통계와 환경 전환",
+        "topics": [
+          {
+            "code": "4.5.1",
+            "title": "날짜별 집계·차트"
+          },
+          {
+            "code": "4.5.2",
+            "title": "DB 설정 변경"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "title": "배포·Git·프로젝트 진행",
+    "units": [
+      {
+        "title": "5.1 웹 배포",
+        "topics": [
+          {
+            "code": "5.1.1",
+            "title": "서버 가상환경·의존성"
+          },
+          {
+            "code": "5.1.2",
+            "title": "WSGI·프로젝트 경로"
+          },
+          {
+            "code": "5.1.3",
+            "title": "정적 파일·업로드·운영 점검"
+          }
+        ]
+      },
+      {
+        "title": "5.2 Git 기초",
+        "topics": [
+          {
+            "code": "5.2.1",
+            "title": "저장소·사용자 설정"
+          },
+          {
+            "code": "5.2.2",
+            "title": "add·commit·push·pull"
+          },
+          {
+            "code": "5.2.3",
+            "title": "GitHub 협업"
+          }
+        ]
+      },
+      {
+        "title": "5.3 분기와 복구",
+        "topics": [
+          {
+            "code": "5.3.1",
+            "title": "브랜치·병합"
+          },
+          {
+            "code": "5.3.2",
+            "title": "로그·reset"
+          },
+          {
+            "code": "5.3.3",
+            "title": "작업 루틴"
+          }
+        ]
+      },
+      {
+        "title": "5.4 프로젝트 산출물",
+        "topics": [
+          {
+            "code": "5.4.1",
+            "title": "주제·벤치마킹·요구사항"
+          },
+          {
+            "code": "5.4.2",
+            "title": "ERD·SQL·화면"
+          },
+          {
+            "code": "5.4.3",
+            "title": "테스트·발표·Git·서비스 주소"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "title": "데이터로 AI 모델을 학습하고 재사용하기",
+    "units": [
+      {
+        "title": "6.1 학습 데이터 준비",
+        "topics": [
+          {
+            "code": "6.1.1",
+            "title": "EDA·분포·결측치"
+          },
+          {
+            "code": "6.1.2",
+            "title": "문자 인코딩·정규화"
+          },
+          {
+            "code": "6.1.3",
+            "title": "X·y·학습/테스트 분리"
+          }
+        ]
+      },
+      {
+        "title": "6.2 예측 모델",
+        "topics": [
+          {
+            "code": "6.2.1",
+            "title": "Dense·compile·fit"
+          },
+          {
+            "code": "6.2.2",
+            "title": "회귀"
+          },
+          {
+            "code": "6.2.3",
+            "title": "이진분류"
+          }
+        ]
+      },
+      {
+        "title": "6.3 평가와 추천",
+        "topics": [
+          {
+            "code": "6.3.1",
+            "title": "모델 구조 비교·Dropout"
+          },
+          {
+            "code": "6.3.2",
+            "title": "손실·정확도·TensorBoard"
+          },
+          {
+            "code": "6.3.3",
+            "title": "선호 확률 기반 추천"
+          }
+        ]
+      },
+      {
+        "title": "6.4 모델 재사용",
+        "topics": [
+          {
+            "code": "6.4.1",
+            "title": ".keras 저장·로드"
+          },
+          {
+            "code": "6.4.2",
+            "title": "전처리 정보 저장"
+          },
+          {
+            "code": "6.4.3",
+            "title": "저장 전후 예측 비교"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "title": "기존 AI 모델·RAG·Agent 활용",
+    "units": [
+      {
+        "title": "7.1 LLM 호출",
+        "topics": [
+          {
+            "code": "7.1.1",
+            "title": "SDK·환경변수"
+          },
+          {
+            "code": "7.1.2",
+            "title": "메시지·역할·프롬프트"
+          },
+          {
+            "code": "7.1.3",
+            "title": "API 응답 처리"
+          }
+        ]
+      },
+      {
+        "title": "7.2 임베딩과 검색",
+        "topics": [
+          {
+            "code": "7.2.1",
+            "title": "문장→벡터"
+          },
+          {
+            "code": "7.2.2",
+            "title": "코사인 유사도"
+          },
+          {
+            "code": "7.2.3",
+            "title": "벡터 저장·검색"
+          }
+        ]
+      },
+      {
+        "title": "7.3 문서 준비",
+        "topics": [
+          {
+            "code": "7.3.1",
+            "title": "PDF 텍스트·OCR"
+          },
+          {
+            "code": "7.3.2",
+            "title": "청킹·오버랩"
+          },
+          {
+            "code": "7.3.3",
+            "title": "CSV·Markdown 적재"
+          }
+        ]
+      },
+      {
+        "title": "7.4 RAG 답변",
+        "topics": [
+          {
+            "code": "7.4.1",
+            "title": "질문 검색"
+          },
+          {
+            "code": "7.4.2",
+            "title": "근거를 포함한 프롬프트"
+          },
+          {
+            "code": "7.4.3",
+            "title": "출처·근거 부족 처리"
+          }
+        ]
+      },
+      {
+        "title": "7.5 도구와 Agent",
+        "topics": [
+          {
+            "code": "7.5.1",
+            "title": "Function Calling"
+          },
+          {
+            "code": "7.5.2",
+            "title": "질문 분기·외부 도구"
+          },
+          {
+            "code": "7.5.3",
+            "title": "LangChain 구성"
+          }
+        ]
+      },
+      {
+        "title": "7.6 로컬 모델",
+        "topics": [
+          {
+            "code": "7.6.1",
+            "title": "내려받은 LLM 호출"
+          },
+          {
+            "code": "7.6.2",
+            "title": "로컬 임베딩"
+          },
+          {
+            "code": "7.6.3",
+            "title": "ChromaDB"
+          }
+        ]
+      },
+      {
+        "title": "7.7 품질과 고도화",
+        "topics": [
+          {
+            "code": "7.7.1",
+            "title": "모델별 속도·근거·환각 비교"
+          },
+          {
+            "code": "7.7.2",
+            "title": "질문 재작성"
+          },
+          {
+            "code": "7.7.3",
+            "title": "도면·출처·대화 이력"
+          },
+          {
+            "code": "7.7.4",
+            "title": "증분 갱신·오류 처리·스트리밍"
+          }
+        ]
+      },
+      {
+        "title": "7.8 서비스 실행 환경",
+        "topics": [
+          {
+            "code": "7.8.1",
+            "title": "Streamlit 화면"
+          },
+          {
+            "code": "7.8.2",
+            "title": "FastAPI 연결"
+          },
+          {
+            "code": "7.8.3",
+            "title": "WSL·서비스 실행"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "title": "JavaScript·React·FastAPI로 화면과 API 연결",
+    "units": [
+      {
+        "title": "8.1 JavaScript 기본",
+        "topics": [
+          {
+            "code": "8.1.1",
+            "title": "값·배열·객체"
+          },
+          {
+            "code": "8.1.2",
+            "title": "함수·클래스·배열 가공"
+          },
+          {
+            "code": "8.1.3",
+            "title": "구조 분해·펼침 등 문법"
+          }
+        ]
+      },
+      {
+        "title": "8.2 비동기 통신",
+        "topics": [
+          {
+            "code": "8.2.1",
+            "title": "Promise"
+          },
+          {
+            "code": "8.2.2",
+            "title": "fetch·JSON"
+          }
+        ]
+      },
+      {
+        "title": "8.3 React 화면",
+        "topics": [
+          {
+            "code": "8.3.1",
+            "title": "Vite·JSX"
+          },
+          {
+            "code": "8.3.2",
+            "title": "컴포넌트·props"
+          },
+          {
+            "code": "8.3.3",
+            "title": "이벤트·state·목록·입력"
+          }
+        ]
+      },
+      {
+        "title": "8.4 화면 상태 관리",
+        "topics": [
+          {
+            "code": "8.4.1",
+            "title": "Router"
+          },
+          {
+            "code": "8.4.2",
+            "title": "생명주기·Hooks"
+          },
+          {
+            "code": "8.4.3",
+            "title": "Zustand·Redux Toolkit"
+          }
+        ]
+      },
+      {
+        "title": "8.5 FastAPI 백엔드",
+        "topics": [
+          {
+            "code": "8.5.1",
+            "title": "DB 연결·ORM"
+          },
+          {
+            "code": "8.5.2",
+            "title": "schemas·CRUD·routes"
+          },
+          {
+            "code": "8.5.3",
+            "title": "React 연결"
+          }
+        ]
+      }
+    ]
+  }
+]

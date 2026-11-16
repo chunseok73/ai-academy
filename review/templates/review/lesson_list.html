@@ -11,59 +11,32 @@
 
     <hr>
 
-    {% for lesson in lessons %}
-        <section>
-            <h2>
-                <a href="{% url 'review:lesson_detail' lesson.id %}">
-                    {{ lesson.title }}
-                </a>
-            </h2>
-            {% if lesson.topic %}<p>{{ lesson.topic.code }} · {{ lesson.topic.breadcrumb }}</p>{% endif %}
-            {% if lesson.topic %}
-                {% with materials=lesson.topic.materials.all %}
-                    {% if materials %}
-                        <details>
-                            <summary>참고 자료와 실습 준비</summary>
-                            <ul>
-                                {% for material in materials %}
-                                    <li>
-                                        <strong>{{ material.title }}</strong> · {{ material.source_date|date:"Y.m.d" }}
-                                        {% if material.preparation %}
-                                            <p>{{ material.preparation|linebreaksbr }}</p>
-                                        {% endif %}
-                                        {% if user.is_staff and material.source_location %}
-                                            <p>개인 보관 위치 <code>{{ material.source_location }}</code></p>
-                                        {% endif %}
-                                    </li>
-                                {% endfor %}
-                            </ul>
-                        </details>
-                    {% endif %}
-                {% endwith %}
-            {% endif %}
-            <p>{{ lesson.offering.name }} · {{ lesson.lesson_date }}</p>
-            <p>{{ lesson.description|linebreaksbr }}</p>
-            <ul aria-label="문제별 복습 진도">
-                {% for exercise in lesson.exercises.all %}
-                    <li>
-                        {{ exercise.title }} ·
-                        {% if exercise.progress_status is None %}
-                            시작 전
-                        {% elif exercise.progress_status %}
-                            복습 완료
-                        {% else %}
-                            학습 중
-                            <a href="{% url 'review:lesson_detail' lesson.id %}">이어서 풀기</a>
-                        {% endif %}
-                    </li>
-                {% empty %}
-                    <li>등록된 문제가 없습니다.</li>
-                {% endfor %}
-            </ul>
-        </section>
-        <hr>
-    {% empty %}
-        <p>현재 수강 중인 강좌에 등록된 복습 수업이 없습니다.</p>
+    <h2>전체 복습 목차</h2>
+    {% for area in curriculum %}
+        <details{% if forloop.first %} open{% endif %}>
+            <summary>{{ forloop.counter }}. {{ area.title }}</summary>
+            {% for unit in area.units %}
+                <h3>{{ unit.title }}</h3>
+                <ul>
+                    {% for topic in unit.topics %}
+                        <li>
+                            <strong>{{ topic.code }} {{ topic.title }}</strong>
+                            {% for lesson in topic.lessons %}
+                                {% include "review/lesson_summary.html" %}
+                            {% empty %}
+                                · 연결된 실습 없음
+                            {% endfor %}
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% endfor %}
+        </details>
     {% endfor %}
+    {% if other_lessons %}
+        <h2>그 밖의 복습 수업</h2>
+        {% for lesson in other_lessons %}
+            {% include "review/lesson_summary.html" %}
+        {% endfor %}
+    {% endif %}
 </body>
 </html>

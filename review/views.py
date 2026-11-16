@@ -1,3 +1,4 @@
+from pathlib import Path
 import ast
 import json
 import urllib.request
@@ -30,10 +31,24 @@ def lesson_list(request):
             user=request.user, exercise__lesson__in=accessible_lessons(request.user),
         ).values_list("exercise_id", "is_completed")
     )
+    other_lessons = []
+    with Path(__file__).with_name("curriculum_index.json").open(encoding="utf-8") as catalog:
+        curriculum = json.load(catalog)
+    topics = {
+        (topic["code"], unit["title"].split(" ", 1)[1]): topic
+        for area in curriculum for unit in area["units"] for topic in unit["topics"]
+    }
     for lesson in lessons:
         for exercise in lesson.exercises.all():
             exercise.progress_status = completion.get(exercise.pk)
-    return render(request, "review/lesson_list.html", {"lessons": lessons})
+        topic = topics.get((lesson.topic.code, lesson.topic.unit)) if lesson.topic else None
+        if topic is None:
+            other_lessons.append(lesson)
+        else:
+            topic.setdefault("lessons", []).append(lesson)
+    return render(request, "review/lesson_list.html", {
+        "curriculum": curriculum, "other_lessons": other_lessons,
+    })
 
 
 @login_required(login_url="login")
