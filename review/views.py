@@ -5,8 +5,10 @@ import urllib.request
 import urllib.error
 
 from django.contrib.auth.decorators import login_required
+from django.db.models import Prefetch
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
 from django.views.decorators.http import require_POST
 
 from academy.models import Enrollment
@@ -25,7 +27,9 @@ def accessible_lessons(user):
 
 @login_required(login_url="login")
 def lesson_list(request):
-    lessons = accessible_lessons(request.user).prefetch_related("topic__materials", "exercises")
+    lessons = accessible_lessons(request.user).prefetch_related(
+        "topic__materials", Prefetch("exercises", queryset=Exercise.objects.filter(guidance__practice_for__isnull=True)),
+    )
     completion = dict(
         LearningProgress.objects.filter(
             user=request.user, exercise__lesson__in=accessible_lessons(request.user),
@@ -57,7 +61,19 @@ def lesson_list(request):
 @login_required(login_url="login")
 def lesson_detail(request, lesson_id):
     lesson = get_object_or_404(accessible_lessons(request.user), pk=lesson_id)
-    exercises = list(Exercise.objects.filter(lesson=lesson))
+    questions = Exercise.objects.filter(lesson=lesson)
+    practice_id = request.GET.get("practice")
+    if practice_id is not None:
+        if not practice_id.isascii() or not practice_id.isdecimal() or len(practice_id) > 18:
+            return redirect("review:lesson_detail", lesson_id=lesson.pk)
+        exercises = [get_object_or_404(questions.filter(guidance__practice_for__isnull=False), pk=int(practice_id))]
+    else:
+        exercises = list(questions.filter(guidance__practice_for__isnull=True))
+        variants = {}
+        for practice in questions.filter(guidance__practice_for__isnull=False):
+            variants.setdefault(practice.guidance["practice_for"], []).append(practice)
+        for exercise in exercises:
+            exercise.practice_variants = variants.get(exercise.pk, [])
     progress_by_exercise = {
         progress.exercise_id: progress
         for progress in LearningProgress.objects.filter(user=request.user, exercise__lesson=lesson)
@@ -87,6 +103,8 @@ def save_code(request, exercise_id):
     LearningProgress.objects.update_or_create(
         user=request.user, exercise=exercise, defaults=changes,
     )
+    if exercise.guidance.get("practice_for"):
+        return redirect(reverse("review:lesson_detail", args=[exercise.lesson_id], query={"practice": exercise.pk}))
     return redirect("review:lesson_detail", lesson_id=exercise.lesson_id)
 
 

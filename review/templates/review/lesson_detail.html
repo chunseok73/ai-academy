@@ -58,6 +58,9 @@
     {% for exercise in exercises %}
     <article>
         <h2>{{ exercise.title }}</h2>
+        {% if exercise.guidance.practice_for %}
+            <p>추가 연습 · <a href="{% url 'review:lesson_detail' lesson.id %}">수업으로 돌아가기</a></p>
+        {% endif %}
         {% if exercise.is_completed %}<p>복습 완료</p>{% endif %}
         <div class="problem">{{ exercise.description|linebreaks }}</div>
         <h3>직접 작성해보세요</h3>
@@ -131,6 +134,16 @@ for step in steps:
             <p>현재 코드도 함께 저장돼요.</p>
         {% endif %}        
         </section>
+        {% if exercise.practice_variants %}
+            <details>
+                <summary>비슷한 문제 더 풀기</summary>
+                <ul>
+                    {% for practice in exercise.practice_variants %}
+                        <li><a href="?practice={{ practice.id }}">{{ practice.title }}</a></li>
+                    {% endfor %}
+                </ul>
+            </details>
+        {% endif %}
     </article>
     {% empty %}<p>등록된 문제가 없습니다.</p>{% endfor %}
 
