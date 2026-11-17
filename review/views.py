@@ -112,10 +112,13 @@ def lesson_detail(request, lesson_id):
     else:
         exercises = list(questions.filter(guidance__practice_for__isnull=True))
         variants = {}
-        for practice in questions.filter(guidance__practice_for__isnull=False):
-            variants.setdefault(practice.guidance["practice_for"], []).append(practice)
+        generated = {}
+        for practice in questions.filter(guidance__practice_for__isnull=False).order_by("-pk"):
+            group = generated if practice.guidance.get("practice_owner") else variants
+            group.setdefault(practice.guidance["practice_for"], []).append(practice)
         for exercise in exercises:
-            exercise.practice_variants = variants.get(exercise.pk, [])
+            exercise.practice_variants = list(reversed(variants.get(exercise.pk, [])))
+            exercise.generated_practices = generated.get(exercise.pk, [])
     progress_by_exercise = {
         progress.exercise_id: progress
         for progress in LearningProgress.objects.filter(user=request.user, exercise__lesson=lesson)
@@ -124,6 +127,11 @@ def lesson_detail(request, lesson_id):
         progress = progress_by_exercise.get(exercise.pk)
         exercise.saved_code = progress.code if progress else exercise.starter_code
         exercise.is_completed = bool(progress and progress.is_completed)
+        for practice in getattr(exercise, "generated_practices", []):
+            record = progress_by_exercise.get(practice.pk)
+            practice.progress_label = (
+                "복습 완료" if record and record.is_completed else "학습 중" if record else "시작 전"
+            )
     return render(request, "review/lesson_detail.html", {
         "lesson": lesson, "exercises": exercises,
     })

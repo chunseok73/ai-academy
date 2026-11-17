@@ -155,6 +155,16 @@ for step in steps:
                 </ul>
             </details>
         {% endif %}
+        {% if exercise.generated_practices %}
+            <details open>
+                <summary>내가 만든 응용문제</summary>
+                <ul>
+                    {% for practice in exercise.generated_practices %}
+                        <li><a href="?practice={{ practice.id }}">{{ practice.title }}</a> · {{ practice.progress_label }}</li>
+                    {% endfor %}
+                </ul>
+            </details>
+        {% endif %}
         <details>
             <summary>AI에게 응용문제 요청</summary>
             <form method="post" action="{% url 'review:request_practice' exercise.id %}"
