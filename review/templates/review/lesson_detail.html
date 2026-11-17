@@ -160,7 +160,15 @@ for step in steps:
                 <summary>내가 만든 응용문제</summary>
                 <ul>
                     {% for practice in exercise.generated_practices %}
-                        <li><a href="?practice={{ practice.id }}">{{ practice.title }}</a> · {{ practice.progress_label }}</li>
+                        <li>
+                            <a href="?practice={{ practice.id }}">{{ practice.title }}</a> · {{ practice.progress_label }}
+                            <form method="post" action="{% url 'review:delete_practice' practice.id %}"
+                                  style="display: inline"
+                                  onsubmit="return confirm('이 응용문제와 저장한 풀이를 함께 삭제할까요?');">
+                                {% csrf_token %}
+                                <button type="submit" aria-label="{{ practice.title }} 삭제">삭제</button>
+                            </form>
+                        </li>
                     {% endfor %}
                 </ul>
             </details>

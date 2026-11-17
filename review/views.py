@@ -68,6 +68,22 @@ def request_practice(request, exercise_id):
 
 
 @login_required(login_url="login")
+@require_POST
+def delete_practice(request, exercise_id):
+    practice = get_object_or_404(
+        visible_exercises(request.user).filter(
+            guidance__practice_owner=request.user.pk,
+            guidance__practice_for__isnull=False,
+        ),
+        pk=exercise_id,
+    )
+    lesson_id = practice.lesson_id
+    practice.delete()
+    messages.success(request, "응용문제와 저장한 풀이를 삭제했어요.")
+    return redirect("review:lesson_detail", lesson_id=lesson_id)
+
+
+@login_required(login_url="login")
 def lesson_list(request):
     lessons = accessible_lessons(request.user).prefetch_related(
         "topic__materials", Prefetch("exercises", queryset=Exercise.objects.filter(guidance__practice_for__isnull=True)),
