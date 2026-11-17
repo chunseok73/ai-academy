@@ -61,7 +61,7 @@
         {% if exercise.is_completed %}<p>복습 완료</p>{% endif %}
         <div class="problem">{{ exercise.description|linebreaks }}</div>
         <h3>직접 작성해보세요</h3>
-        <form method="post" action="{% url 'review:save_code' exercise.id %}">
+        <form id="practice-form-{{ exercise.id }}" method="post" action="{% url 'review:save_code' exercise.id %}">
             {% csrf_token %}
             <div class="editor">
                 <div class="editor-bar">Python · main.py</div>
@@ -73,12 +73,7 @@
             <p class="editor-help">들여쓰기에는 공백 4칸을 사용하세요. 작성한 코드는 ‘코드 저장’으로 보관할 수 있어요.</p>
             <div class="actions">
             <button type="button" onclick="runCode(this)" class="run-button">실행하기</button>
-            <button type="submit">코드 저장</button>
-            {% if exercise.is_completed %}
-                <button type="submit" name="completion" value="resume">완료 표시 취소</button>
-            {% else %}
-                <button type="submit" name="completion" value="complete">저장하고 복습 완료</button>
-            {% endif %}
+            <button type="submit">풀이 저장</button>
             <button type="button" class="hint-button" data-url="{% url 'review:request_hint' exercise.id %}" onclick="getHint(this)">학습 힌트 받기 · 1단계</button>
             </div>
             <p class="hint" role="status" aria-live="polite"></p>
@@ -127,6 +122,14 @@ for step in steps:
                 <pre class="expected">{{ exercise.expected_output }}</pre>
             {% endif %}
         </details>
+        {% if exercise.is_completed %}
+            <button type="submit" form="practice-form-{{ exercise.id }}"
+                    name="completion" value="resume">완료 표시 취소</button>
+        {% else %}
+            <button type="submit" form="practice-form-{{ exercise.id }}"
+                    name="completion" value="complete">복습 완료</button>
+            <p>현재 코드도 함께 저장돼요.</p>
+        {% endif %}        
         </section>
     </article>
     {% empty %}<p>등록된 문제가 없습니다.</p>{% endfor %}
