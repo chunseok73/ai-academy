@@ -29,9 +29,8 @@ if not SECRET_KEY:
     raise ImproperlyConfigured("DJANGO_SECRET_KEY 환경변수를 설정하세요.")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
-
-ALLOWED_HOSTS = []
+DEBUG = False
+ALLOWED_HOSTS = ["127.0.0.1", "localhost", "192.168.1.17"]
 
 
 # Application definition
