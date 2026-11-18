@@ -137,15 +137,12 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 
+STATIC_ROOT = BASE_DIR / "staticfiles"
 
 # Email
 # https://docs.djangoproject.com/en/6.1/topics/email/#topic-email-configuration
 
-MAILERS = {
-    'default': {
-        'BACKEND': 'django.core.mail.backends.console.EmailBackend',
-    },
-}
+MAILERS = {}
 # 사용자가 올린 첨부파일의 저장 위치입니다.
 MEDIA_ROOT = BASE_DIR / "media"
 MEDIA_URL = "/media/"
