@@ -57,6 +57,8 @@ def request_practice(request, exercise_id):
         lesson_id=exercise.lesson_id,
         title=problem["title"],
         description=problem["description"],
+        starter_code=problem.get("starter_code", ""),
+        expected_output=problem.get("expected_output", ""),
         guidance={
             "practice_for": parent_id,
             "practice_owner": request.user.pk,
