@@ -1,0 +1,15 @@
+{
+  "id": "1.1.1-basic-01",
+  "topic_code": "1.1.1",
+  "title": "물건값 계산하고 출력하기",
+  "description": "가격이 1200원인 물건을 3개 샀습니다. price와 quantity를 곱한 값을 total 변수에 저장하고, total을 출력하세요.",
+  "starter_code": "price = 1200\nquantity = 3\n\n# total을 만들고 출력하세요.\n",
+  "expected_output": "3600",
+  "hints": [
+    "가격과 개수를 곱하면 전체 금액이 됩니다.",
+    "곱셈에는 * 기호를 사용하고 결과를 total에 저장하세요.",
+    "마지막에 print(total)로 값을 출력하세요."
+  ],
+  "prerequisites": ["변수에 값 저장하기", "숫자 곱셈"],
+  "next_use": "변수에 계산 결과를 저장하는 방법은 이후 반복문에서 합계를 누적하거나, 주문 금액을 계산할 때도 사용합니다."
+}
